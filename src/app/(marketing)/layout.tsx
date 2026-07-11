@@ -1,4 +1,4 @@
-import './globals.css';
+import '../globals.css';
 import MarketingNavbar from '@/components/MarketingNavbar';
 import MarketingFooter from '@/components/MarketingFooter';
 import type { ReactNode } from 'react';

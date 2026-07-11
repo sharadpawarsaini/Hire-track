@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import './globals.css';
+import '../globals.css';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Toaster } from '@/components/ui/Toaster';
 
