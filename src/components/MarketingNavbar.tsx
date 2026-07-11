@@ -9,7 +9,7 @@ export default function MarketingNavbar() {
           HireTrack
         </Link>
         {/* Navigation */}
-        <nav className="flex space-x-6">
+        <nav className="flex items-center space-x-6">
           <Link href="/" className="hover:text-indigo-300 transition-colors">
             Home
           </Link>
@@ -18,6 +18,18 @@ export default function MarketingNavbar() {
           </Link>
           <Link href="/contact" className="hover:text-indigo-300 transition-colors">
             Contact
+          </Link>
+          <Link
+            href="/login"
+            className="hover:text-indigo-300 transition-colors text-sm font-medium border border-gray-700 px-3 py-1.5 rounded-lg hover:border-indigo-500 transition-all"
+          >
+            Log In
+          </Link>
+          <Link
+            href="/signup"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Sign Up
           </Link>
         </nav>
       </div>

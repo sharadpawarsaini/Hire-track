@@ -14,11 +14,15 @@ export const viewport: Viewport = {
   themeColor: '#0f172a',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import { getCurrentUser } from '@/lib/auth';
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser();
+
   return (
     <html lang="en" className="dark">
       <body className="flex h-screen overflow-hidden">
-        <Sidebar />
+        <Sidebar user={user} />
         <main className="flex-1 overflow-y-auto bg-[hsl(222,47%,4%)]">
           {children}
         </main>

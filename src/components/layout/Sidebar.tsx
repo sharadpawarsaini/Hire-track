@@ -2,11 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { logoutAction } from '@/lib/auth-actions';
+
+interface UserSession {
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  orgId: string;
+}
 
 const nav = [
   {
     label: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
@@ -64,8 +73,23 @@ const nav = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ user }: { user: UserSession | null }) {
   const pathname = usePathname();
+
+  const displayName = user?.name || 'Demo Owner';
+  const displayEmail = user?.email || 'demo@demo.com';
+  
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+
+  const handleLogout = async () => {
+    await logoutAction();
+    window.location.href = '/login';
+  };
 
   return (
     <aside
@@ -82,15 +106,15 @@ export function Sidebar() {
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
           </svg>
         </div>
-        <span className="text-[15px] font-semibold tracking-tight" style={{ color: 'hsl(210,40%,96%)' }}>
+        <Link href="/" className="text-[15px] font-semibold tracking-tight hover:text-indigo-400 transition-colors" style={{ color: 'hsl(210,40%,96%)' }}>
           HireTrack
-        </span>
+        </Link>
       </div>
 
       {/* Nav items */}
       <nav className="flex-1 space-y-0.5 px-2 py-4">
         {nav.map((item) => {
-          const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+          const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
@@ -115,23 +139,35 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-4" style={{ borderTop: '1px solid hsl(217,32%,13%)' }}>
+      <div className="px-4 py-4 space-y-3" style={{ borderTop: '1px solid hsl(217,32%,13%)' }}>
         <div className="flex items-center gap-3">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold uppercase flex-shrink-0"
             style={{ background: 'hsl(224,76%,48%,0.25)', color: 'hsl(224,76%,72%)' }}
           >
-            DO
+            {initials}
           </div>
           <div className="flex-1 overflow-hidden">
             <p className="truncate text-[13px] font-medium" style={{ color: 'hsl(210,40%,92%)' }}>
-              Demo Owner
+              {displayName}
             </p>
             <p className="truncate text-[11px]" style={{ color: 'hsl(215,20%,50%)' }}>
-              demo@demo.com
+              {displayEmail}
             </p>
           </div>
         </div>
+        
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 rounded-md px-3 py-1.5 text-[12.5px] font-medium text-red-400 hover:text-red-355 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
       </div>
     </aside>
   );

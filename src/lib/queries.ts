@@ -1,14 +1,30 @@
 import { db } from './db';
+import { getCurrentUser } from './auth';
 
 // ─── Dashboard ──────────────────────────────────────────────────────────────
 export async function getDashboardStats() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      totalJobs: 0,
+      openJobs: 0,
+      totalCandidates: 0,
+      totalApplications: 0,
+      recentActivity: [],
+      stageBreakdown: [],
+    };
+  }
+
+  const orgId = user.orgId;
+
   const [totalJobs, openJobs, totalCandidates, totalApplications, recentActivity] =
     await Promise.all([
-      db.job.count({ where: { deletedAt: null } }),
-      db.job.count({ where: { status: 'OPEN', deletedAt: null } }),
-      db.candidate.count({ where: { deletedAt: null } }),
-      db.application.count(),
+      db.job.count({ where: { orgId, deletedAt: null } }),
+      db.job.count({ where: { orgId, status: 'OPEN', deletedAt: null } }),
+      db.candidate.count({ where: { orgId, deletedAt: null } }),
+      db.application.count({ where: { candidate: { orgId } } }),
       db.activityLog.findMany({
+        where: { orgId },
         take: 8,
         orderBy: { createdAt: 'desc' },
         include: { organization: { select: { name: true } } },
@@ -16,6 +32,7 @@ export async function getDashboardStats() {
     ]);
 
   const stageBreakdown = await db.application.groupBy({
+    where: { candidate: { orgId } },
     by: ['stage'],
     _count: true,
   });
@@ -25,8 +42,11 @@ export async function getDashboardStats() {
 
 // ─── Jobs ───────────────────────────────────────────────────────────────────
 export async function getJobs() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
   return db.job.findMany({
-    where: { deletedAt: null },
+    where: { orgId: user.orgId, deletedAt: null },
     orderBy: { createdAt: 'desc' },
     include: {
       _count: { select: { applications: true } },
@@ -35,8 +55,11 @@ export async function getJobs() {
 }
 
 export async function getJobById(id: string) {
-  return db.job.findUnique({
-    where: { id },
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  return db.job.findFirst({
+    where: { id, orgId: user.orgId },
     include: {
       applications: {
         include: {
@@ -52,12 +75,16 @@ export async function getJobById(id: string) {
 
 // ─── Candidates ──────────────────────────────────────────────────────────────
 export async function getCandidates() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
   return db.candidate.findMany({
-    where: { deletedAt: null },
+    where: { orgId: user.orgId, deletedAt: null },
     orderBy: { createdAt: 'desc' },
     include: {
       _count: { select: { applications: true } },
       applications: {
+        where: { job: { orgId: user.orgId } },
         select: { stage: true, job: { select: { title: true } } },
         orderBy: { updatedAt: 'desc' },
         take: 1,
@@ -68,7 +95,20 @@ export async function getCandidates() {
 
 // ─── Pipeline ────────────────────────────────────────────────────────────────
 export async function getPipelineData() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      APPLIED: [],
+      SCREEN: [],
+      INTERVIEW: [],
+      OFFER: [],
+      HIRED: [],
+      REJECTED: [],
+    };
+  }
+
   const applications = await db.application.findMany({
+    where: { job: { orgId: user.orgId } },
     orderBy: [{ stage: 'asc' }, { updatedAt: 'desc' }],
     include: {
       candidate: true,
@@ -86,7 +126,11 @@ export async function getPipelineData() {
 
 // ─── Interviews ───────────────────────────────────────────────────────────────
 export async function getInterviews() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
   return db.interview.findMany({
+    where: { application: { job: { orgId: user.orgId } } },
     orderBy: { scheduledAt: 'asc' },
     include: {
       application: {
@@ -101,7 +145,11 @@ export async function getInterviews() {
 
 // ─── Activity ─────────────────────────────────────────────────────────────────
 export async function getActivityLogs() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
   return db.activityLog.findMany({
+    where: { orgId: user.orgId },
     orderBy: { createdAt: 'desc' },
     take: 50,
   });
