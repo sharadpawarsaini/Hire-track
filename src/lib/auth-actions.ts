@@ -6,7 +6,7 @@ import { db } from './db';
 import { signJWT } from './auth';
 
 export async function loginAction(state: any, formData: FormData) {
-  const email = formData.get('email') as string;
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
   const password = formData.get('password') as string;
 
   if (!email || !password) {
@@ -53,30 +53,45 @@ export async function loginAction(state: any, formData: FormData) {
 }
 
 export async function signupAction(state: any, formData: FormData) {
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
+  const name = (formData.get('name') as string)?.trim();
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
   const password = formData.get('password') as string;
-  const companyName = formData.get('companyName') as string;
+  const companyName = (formData.get('companyName') as string)?.trim();
 
   if (!name || !email || !password || !companyName) {
-    return { error: 'Please enter all fields.' };
+    return { error: 'Please fill in all fields.' };
+  }
+
+  if (password.length < 8) {
+    return { error: 'Password must be at least 8 characters.' };
   }
 
   try {
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    });
-
+    // Check if email already exists
+    const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
-      return { error: 'Email already registered.' };
+      return { error: 'An account with this email already exists.' };
+    }
+
+    // Generate a unique slug for the organization
+    const baseSlug = companyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'org';
+
+    // Ensure slug uniqueness by appending a short random suffix if needed
+    let orgSlug = baseSlug;
+    const existingOrg = await db.organization.findUnique({ where: { slug: orgSlug } });
+    if (existingOrg) {
+      // Append random 6-char suffix to make it unique
+      orgSlug = `${baseSlug}-${Math.random().toString(36).slice(2, 8)}`;
     }
 
     // Create organization
-    const orgSlug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const org = await db.organization.create({
       data: {
         name: companyName,
-        slug: orgSlug || `org-${Date.now()}`,
+        slug: orgSlug,
       },
     });
 
@@ -111,7 +126,17 @@ export async function signupAction(state: any, formData: FormData) {
 
     return { success: true };
   } catch (err: any) {
-    console.error('Signup error:', err);
+    console.error('Signup error details:', {
+      message: err.message,
+      code: err.code,
+      meta: err.meta,
+    });
+    // Provide specific error for common Prisma constraint violations
+    if (err.code === 'P2002') {
+      const field = err.meta?.target?.[0];
+      if (field === 'email') return { error: 'An account with this email already exists.' };
+      if (field === 'slug') return { error: 'Organization name already taken. Please try a different name.' };
+    }
     return { error: 'An unexpected error occurred. Please try again.' };
   }
 }

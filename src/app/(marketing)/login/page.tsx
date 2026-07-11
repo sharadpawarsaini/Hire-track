@@ -26,70 +26,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 p-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
-      <h1 className="text-3xl font-bold text-center text-white mb-6">Log in to HireTrack</h1>
-      
-      {state?.error && (
-        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded mb-6 text-sm">
-          {state.error}
-        </div>
-      )}
-
-      <form action={formAction} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="email">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            ref={emailRef}
-            required
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            ref={passwordRef}
-            required
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
-        >
-          {isPending ? (
-            <>
-              <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      <div className="w-full max-w-md">
+        {/* Logo / Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-white" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Logging in...
-            </>
-          ) : 'Log In'}
-        </button>
-      </form>
+            </div>
+            <span className="text-2xl font-bold text-white">HireTrack</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Welcome back</h1>
+          <p className="text-gray-400 mt-2 text-sm">Sign in to your workspace</p>
+        </div>
 
-      <div className="mt-6 text-center">
-        <button
-          onClick={fillDemoCredentials}
-          className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-        >
-          Prefill Demo Account (demo@demo.com / demo1234)
-        </button>
-      </div>
+        <div className="bg-gray-800/60 backdrop-blur border border-gray-700/60 rounded-2xl shadow-2xl p-8">
+          {state?.error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg mb-6 text-sm flex items-start gap-2">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {state.error}
+            </div>
+          )}
 
-      <div className="mt-8 text-center text-sm text-gray-400">
-        Don&apos;t have an account?{' '}
-        <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium">
-          Sign up
-        </Link>
+          <form action={formAction} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                ref={emailRef}
+                required
+                placeholder="you@company.com"
+                className="w-full px-4 py-2.5 bg-gray-900/80 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-gray-300" htmlFor="password">
+                  Password
+                </label>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                ref={passwordRef}
+                required
+                placeholder="Enter your password"
+                className="w-full px-4 py-2.5 bg-gray-900/80 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-2"
+            >
+              {isPending ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in…
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
+
+          {/* Demo credentials */}
+          <div className="mt-5 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-center">
+            <p className="text-xs text-indigo-300 mb-2">Try the live demo</p>
+            <button
+              onClick={fillDemoCredentials}
+              className="text-xs bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 px-4 py-1.5 rounded-md transition-colors font-medium"
+            >
+              Prefill demo@demo.com / demo1234
+            </button>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-gray-400">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+              Sign up free
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
